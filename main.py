@@ -43,10 +43,10 @@ async def add_entreprise(entreprise: entreprise):
     db['entreprise'].insert_one(entreprise.dict())
     
     # Run the shell command
-    command = ["./docker.sh", "3700", f"{entreprise.name}", f"mongodb://152.228.135.170:27017/{entreprise.name}", f"{entreprise.name}", "30", "http://152.228.135.170:3700"]
+    command = ["./docker.sh", "3700", f"{entreprise.name}", f"mongodb://mongo:27017/{entreprise.name}", f"{entreprise.name}", "30", "http://152.228.135.170:3700"]
     try:
-        result = subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        return {"message": "Entreprise added successfully!", "script_output": result.stdout.decode()}
+        subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        return {"message": "Entreprise added successfully!"}
     except subprocess.CalledProcessError as e:
         return {"message": "Entreprise added, but script failed!", "error": e.stderr.decode()}
 
