@@ -14,6 +14,7 @@ front_port=$5
 back_url=$6
 
 
+cd ..
 
 mkdir $service_name
 
