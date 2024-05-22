@@ -160,7 +160,7 @@ echo "Dockerfile has been generated successfully!"
 # Execute the docker build command
 docker build -t $client_name --build-arg PORT=$front_port  --build-arg  back_url=$back_url -f Dockerfile .
 
-docker run -p ${front_port}:${front_port}  $client_name
+docker run -d -p ${front_port}:${front_port}  $client_name
 
 
 echo "Frontend container has been started successfully in detached mode!"
