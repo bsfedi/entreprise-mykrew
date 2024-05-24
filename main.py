@@ -36,17 +36,35 @@ db : Database = MongoClient("mongodb://152.228.135.170:27017/")["mykrew"]
 app=FastAPI()
 stripe.api_key = "sk_test_51Konz7AH2X0tC2h7ISzXJXqRwx85OPqhCLPZgxPgUSLEU1BUlHo4e5kF0w0TCItFD8xp94YnERfOGHsAS7D4eLs5001bHenXDy"
 
+import random
+
 
 
 @app.post("/add_entreprise")
 async def add_entreprise(entreprise: entreprise):
-    db['entreprise'].insert_one(entreprise.dict())
-    
+    check_ports= []
+    entreprise = db['entreprise'].insert_one(entreprise.dict())
+    all_ports = db["prots"].find()
+    for port in all_ports :
+        check_ports.append(port['front'])
+        check_ports.append(port['back'])
+
+    back = random.randint(1000, 9999)
+    front = random.randint(10, 99)
+
+    while back in check_ports or front  in check_ports  :
+        
+        back = random.randint(1000, 9999)
+        front = random.randint(10, 99)
+    else:
+     
+        all_ports = db["prots"].insert_one({"entreprise":entreprise.inserted_id,"front":front,"back":back})
+
     # Run the shell command
-    command = ["./docker.sh", "3700", f"{entreprise.name}", f"mongodb://mongo:27017/{entreprise.name}", f"{entreprise.name}", "30", "http://152.228.135.170:3700/"]
+    command = ["./docker.sh", f"{back}", f"{entreprise.name}", f"mongodb://mongo:27017/{entreprise.name}", f"{entreprise.name}", f"{front}", "http://152.228.135.170:3700/"]
     try:
         subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        return {"message": "Entreprise added successfully!"}
+        return f"http://152.228.135.170:{front}/"
     except subprocess.CalledProcessError as e:
         return {"message": "Entreprise added, but script failed!", "error": e.stderr.decode()}
 
