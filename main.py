@@ -61,7 +61,7 @@ async def add_entreprise(entreprise: entreprise):
         all_ports = db["prots"].insert_one({"entreprise":new_entreprise.inserted_id,"front":front,"back":back})
 
     # Run the shell command
-    command = ["./docker.sh", f"{back}", f"{entreprise.name}", f"mongodb://mongo:27017/{entreprise.name}", f"{entreprise.name}", f"{front}", "http://152.228.135.170:3700/"]
+    command = ["./docker.sh", f"{back}", f"{entreprise.name}", f"mongodb://mongo:27017/{entreprise.name}", f"{entreprise.name}", f"{front}", f"http://152.228.135.170:{back}/"]
     try:
         subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         return f"http://152.228.135.170:{front}/"
