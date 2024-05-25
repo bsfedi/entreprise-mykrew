@@ -115,10 +115,7 @@ def add_user(entreprise):
 
     try:
         db1 : Database = MongoClient("mongodb://152.228.135.170:27017/")[f"{entreprise.name.lower()}"]
-        print(db1)
-        password = generate_password()
-        hashed_password = ph.hash(password)
-        new_password = hashed_password          
+       
         sender_address = gmail_user
         sender_pass = pass_code
         receiver_address = entreprise.email
@@ -136,6 +133,7 @@ def add_user(entreprise):
         session.login(sender_address, sender_pass)  # login with mail_id and password
         text = message.as_string()
         session.sendmail(sender_address, receiver_address, text)
+        print(entreprise.email)
         response = db1["users"].insert_one({
             "image": "default.jpg",
             "email": entreprise.email,
@@ -157,6 +155,7 @@ def add_user(entreprise):
         print(response.inserted_id)
         return {"response":"user added sucessfully"}
     except Exception as e:
+        print(e)
         return False
 
 @app.get("/create-checkout-session/{entreprise_id}/{price_id}")
