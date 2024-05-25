@@ -30,7 +30,7 @@ class entreprise(BaseModel):
 
 
 
-db : Database = MongoClient("mongodb://152.228.135.170:27017/")["mykrew"]
+db : Database = MongoClient("mongodb://152.228.135.170:27017/")["myKrew"]
 
 
 app=FastAPI()
