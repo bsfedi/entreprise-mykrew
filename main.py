@@ -11,6 +11,36 @@ from pydantic import BaseModel, EmailStr
 from typing import Optional
 import subprocess
 
+
+from bson import ObjectId
+from fastapi import APIRouter, File, HTTPException
+from argon2 import PasswordHasher
+import re
+import smtplib
+
+user_router = APIRouter(tags=["User"])
+
+ph = PasswordHasher()
+
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+gmail_user = "fedislimen98@gmail.com"
+pass_code=  "wiuijqbeodgezebw"
+
+
+import random
+import string
+subject = f"Compte Enseignant créé sur la plateforme SGI-ISETN"
+def generate_password(length=12):
+    # Define the characters to choose from
+    characters = string.ascii_letters + string.digits + string.punctuation
+    
+    # Generate the password
+    password = ''.join(random.choice(characters) for i in range(length))
+    
+    return password
+
+
 class entreprise(BaseModel):
     name: str =""
     siret: str =""
@@ -30,7 +60,7 @@ class entreprise(BaseModel):
 
 
 
-db : Database = MongoClient("mongodb://152.228.135.170:27017/")["myKrew"]
+
 
 
 app=FastAPI()
@@ -42,6 +72,7 @@ import random
 
 @app.post("/add_entreprise")
 async def add_entreprise(entreprise: entreprise):
+    db : Database = MongoClient("mongodb://152.228.135.170:27017/")["myKrew"]
     check_ports= []
     new_entreprise = db['entreprise'].insert_one(entreprise.dict())
     all_ports = db["prots"].find()
@@ -61,13 +92,72 @@ async def add_entreprise(entreprise: entreprise):
         all_ports = db["prots"].insert_one({"entreprise":new_entreprise.inserted_id,"front":front,"back":back})
 
     # Run the shell command
-    command = ["./docker.sh", f"{back}", f"{entreprise.name}", f"mongodb://mongo:27017/{entreprise.name}", f"{entreprise.name}", f"{front}", f"http://152.228.135.170:{back}/"]
+    # command = ["./docker.sh", f"{back}", f"{entreprise.name}", f"mongodb://mongo:27017/{entreprise.name}", f"{entreprise.name}", f"{front}", f"http://152.228.135.170:{back}/"]
     try:
-        subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        
+        add_user(entreprise)
         return f"http://152.228.135.170:{front}/"
     except subprocess.CalledProcessError as e:
         return {"message": "Entreprise added, but script failed!", "error": e.stderr.decode()}
 
+
+def add_user(entreprise):
+    """
+    Validates a password format based on specified requirements:
+    - At least 8 characters long
+    - Contains at least one uppercase letter
+    - Contains at least one lowercase letter
+    - Contains at least one digit
+    - Contains at least one special character
+    """
+    # Get date of today
+
+    try:
+        db1 : Database = MongoClient("mongodb://152.228.135.170:27017/")[f"{entreprise.name}"]
+        print(db1)
+        password = generate_password()
+        hashed_password = ph.hash(password)
+        new_password = hashed_password          
+        sender_address = gmail_user
+        sender_pass = pass_code
+        receiver_address = entreprise.email
+        message = MIMEMultipart()
+        message["From"] = sender_address
+        message["To"] = entreprise.email
+        message["Subject"] = subject
+
+                            # Attach the additional information and HTML table to the email
+        message.attach(MIMEText(f" Bonjour, Pour y accéder au platforme, veuillez utiliser les paramètres suivants:  <br>   Nom d’utilisateur : <b> {entreprise.email} </b> <br> <b> Mot de passe: 123456 </b> <br> En cas de difficultés, vous pouvez contacter l’administrateur de la plateforme via mail ou par téléphone.  ", "html"))
+
+                            # Create SMTP session for sending the mail
+        session = smtplib.SMTP("smtp.gmail.com", 587)  # use gmail with port
+        session.starttls()  # enable security
+        session.login(sender_address, sender_pass)  # login with mail_id and password
+        text = message.as_string()
+        session.sendmail(sender_address, receiver_address, text)
+        response = db1["users"].insert_one({
+            "image": "default.jpg",
+            "email": entreprise.email,
+            "password": "$2b$10$ICWgDd25cMt72MgRPSwLA.9N6VpD2MxcOxxfYBmxwUhGUn.PeJ82W",
+            "role": "ADMIN",
+            "missions": [],
+            "userDocuments": [],
+            "__v": 0,
+            "personalInfo": {
+                "firstName": entreprise.nom,
+                "lastName": entreprise.prenom,
+                "email": entreprise.email,
+                "location": "",
+                "nationality": "",
+                "phoneNumber": entreprise.phone
+            },
+            "isAvtivated": True
+            })
+        print(response.inserted_id)
+        return {"response":"user added sucessfully"}
+    except Exception as e:
+        return False
 
 @app.get("/create-checkout-session/{entreprise_id}/{price_id}")
 async def create_checkout_session(entreprise_id,price_id):
