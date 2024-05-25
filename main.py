@@ -43,7 +43,7 @@ import random
 @app.post("/add_entreprise")
 async def add_entreprise(entreprise: entreprise):
     check_ports= []
-    entreprise = db['entreprise'].insert_one(entreprise.dict())
+    new_entreprise = db['entreprise'].insert_one(entreprise.dict())
     all_ports = db["prots"].find()
     for port in all_ports :
         check_ports.append(port['front'])
@@ -58,7 +58,7 @@ async def add_entreprise(entreprise: entreprise):
         front = random.randint(10, 99)
     else:
      
-        all_ports = db["prots"].insert_one({"entreprise":entreprise.inserted_id,"front":front,"back":back})
+        all_ports = db["prots"].insert_one({"entreprise":new_entreprise.inserted_id,"front":front,"back":back})
 
     # Run the shell command
     command = ["./docker.sh", f"{back}", f"{entreprise.name}", f"mongodb://mongo:27017/{entreprise.name}", f"{entreprise.name}", f"{front}", "http://152.228.135.170:3700/"]
