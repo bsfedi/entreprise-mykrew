@@ -94,7 +94,7 @@ async def add_entreprise(entreprise: entreprise):
     # Run the shell command
     command = ["./docker.sh", f"{back}", f"{entreprise.name.lower()}", f"mongodb://mongo:27017/{entreprise.name.lower()}", f"{entreprise.name.lower()}", f"{front}", f"http://152.228.135.170:{back}/"]
     try:
-        # subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         
         add_user(entreprise)
         return f"http://152.228.135.170:{front}/"
