@@ -30,7 +30,7 @@ pass_code=  "wiuijqbeodgezebw"
 
 import random
 import string
-subject = f"Compte Enseignant créé sur la plateforme SGI-ISETN"
+subject = f"Compte créé sur la plateforme Mykrew"
 def generate_password(length=12):
     # Define the characters to choose from
     characters = string.ascii_letters + string.digits + string.punctuation
@@ -92,7 +92,7 @@ async def add_entreprise(entreprise: entreprise):
         all_ports = db["prots"].insert_one({"entreprise":new_entreprise.inserted_id,"front":front,"back":back})
 
     # Run the shell command
-    # command = ["./docker.sh", f"{back}", f"{entreprise.name}", f"mongodb://mongo:27017/{entreprise.name}", f"{entreprise.name}", f"{front}", f"http://152.228.135.170:{back}/"]
+    command = ["./docker.sh", f"{back}", f"{entreprise.name.lower()}", f"mongodb://mongo:27017/{entreprise.name.lower()}", f"{entreprise.name.lower()}", f"{front}", f"http://152.228.135.170:{back}/"]
     try:
         # subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         
@@ -114,7 +114,7 @@ def add_user(entreprise):
     # Get date of today
 
     try:
-        db1 : Database = MongoClient("mongodb://152.228.135.170:27017/")[f"{entreprise.name}"]
+        db1 : Database = MongoClient("mongodb://152.228.135.170:27017/")[f"{entreprise.name.lower()}"]
         print(db1)
         password = generate_password()
         hashed_password = ph.hash(password)
