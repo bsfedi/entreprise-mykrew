@@ -114,7 +114,7 @@ def add_user(entreprise):
     # Get date of today
 
     try:
-        db1 : Database = MongoClient("mongodb://152.228.135.170:27017/")[f"{entreprise.name.lower()}"]
+        db1 : Database = MongoClient(f"mongodb://mongo:27017/{entreprise.name.lower()}")
        
         sender_address = gmail_user
         sender_pass = pass_code
