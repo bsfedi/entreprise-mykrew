@@ -114,7 +114,7 @@ def add_user(entreprise):
     # Get date of today
 
     try:
-        db1 : Database = MongoClient("mongodb://152.228.135.170:27017/")[f"{entreprise.name.lower()}"]
+        db1 : Database = MongoClient("mongodb://mongo:27017/")[f"{entreprise.name.lower()}"]
        
         sender_address = gmail_user
         sender_pass = pass_code
@@ -227,8 +227,15 @@ async def webhook(request: Request):
         return "OK"
 
 
-# @app.get('/get_entreprises')
-# async def get_entreprises():
+@app.get('/get_entreprises')
+async def get_entreprises():
+    entreprises = []
+    all_entreprise = db['entreprise'].find()
+    for entreprise in all_entreprise:
+        entreprise['_id']=str(entreprise['_id'])
+
+        entreprises.append(entreprise)
+    return entreprises
 
 # @app.post('/webhook/stripe')
 # async def stripe_webhook(request: Request):
