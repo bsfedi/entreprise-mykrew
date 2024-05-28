@@ -61,7 +61,7 @@ class entreprise(BaseModel):
 
 
 
-
+db : Database = MongoClient("mongodb://152.228.135.170:27017/")["myKrew"]
 
 app=FastAPI()
 stripe.api_key = "sk_test_51Konz7AH2X0tC2h7ISzXJXqRwx85OPqhCLPZgxPgUSLEU1BUlHo4e5kF0w0TCItFD8xp94YnERfOGHsAS7D4eLs5001bHenXDy"
@@ -72,7 +72,7 @@ import random
 
 @app.post("/add_entreprise")
 async def add_entreprise(entreprise: entreprise):
-    db : Database = MongoClient("mongodb://152.228.135.170:27017/")["myKrew"]
+    
     check_ports= []
     new_entreprise = db['entreprise'].insert_one(entreprise.dict())
     all_ports = db["prots"].find()
@@ -114,7 +114,7 @@ def add_user(entreprise):
     # Get date of today
 
     try:
-        db1 : Database = MongoClient(f"mongodb://mongo:27017/{entreprise.name.lower()}")
+        db1 : Database = MongoClient("mongodb://152.228.135.170:27017/")[f"{entreprise.name.lower()}"]
        
         sender_address = gmail_user
         sender_pass = pass_code
@@ -226,6 +226,9 @@ async def webhook(request: Request):
 
         return "OK"
 
+
+# @app.get('/get_entreprises')
+# async def get_entreprises():
 
 # @app.post('/webhook/stripe')
 # async def stripe_webhook(request: Request):
