@@ -114,7 +114,7 @@ def add_user(entreprise):
     # Get date of today
 
     try:
-        db1 : Database = MongoClient(f"mongodb://mongo:27017/{entreprise.name.lower()}")
+        db : Database = MongoClient("mongodb://152.228.135.170:27017/")[f"{entreprise.name.lower()}"]
        
         sender_address = gmail_user
         sender_pass = pass_code
@@ -134,7 +134,7 @@ def add_user(entreprise):
         text = message.as_string()
         session.sendmail(sender_address, receiver_address, text)
         print(entreprise.email)
-        response = db1["users"].insert_one({
+        response = db["users"].insert_one({
             "image": "default.jpg",
             "email": entreprise.email,
             "password": "$2b$10$ICWgDd25cMt72MgRPSwLA.9N6VpD2MxcOxxfYBmxwUhGUn.PeJ82W",
