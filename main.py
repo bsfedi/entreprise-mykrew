@@ -92,8 +92,9 @@ async def add_entreprise(entreprise: entreprise):
         all_ports = db["prots"].insert_one({"entreprise":new_entreprise.inserted_id,"front":front,"back":back})
 
     # Run the shell command
-    command = ["./docker.sh", f"{back}", f"{entreprise.name.lower()}", f"mongodb://mongo:27017/{entreprise.name.lower()}", f"{entreprise.name.lower()}", f"{front}", f"http://152.228.135.170:{back}/"]
+    
     try:
+        command = ["./docker.sh", f"{back}", f"{entreprise.name.lower()}", f"mongodb://mongo:27017/{entreprise.name.lower()}", f"{entreprise.name.lower()}", f"{front}", f"http://152.228.135.170:{back}/"]
         subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         
         add_user(entreprise)
@@ -114,7 +115,7 @@ def add_user(entreprise):
     # Get date of today
 
     try:
-        db : Database = MongoClient("mongodb://152.228.135.170:27017/")[f"{entreprise.name.lower()}"]
+        
        
         sender_address = gmail_user
         sender_pass = pass_code
@@ -132,8 +133,7 @@ def add_user(entreprise):
         session.starttls()  # enable security
         session.login(sender_address, sender_pass)  # login with mail_id and password
         text = message.as_string()
-        session.sendmail(sender_address, receiver_address, text)
-        print(entreprise.email)
+        db : Database = MongoClient("mongodb://152.228.135.170:27017/")[f"{entreprise.name.lower()}"]
         response = db["users"].insert_one({
             "image": "default.jpg",
             "email": entreprise.email,
@@ -152,11 +152,15 @@ def add_user(entreprise):
             },
             "isAvtivated": True
             })
-        print(response.inserted_id)
+        if response.inserted_id :
+            session.sendmail(sender_address, receiver_address, text)
+        else:
+            session.sendmail(sender_address, receiver_address, "please contact us if you receive this mail")
+
         return {"response":"user added sucessfully"}
     except Exception as e:
-        print(e)
-        return False
+        return {"error": str(e)}
+    
 
 @app.get("/create-checkout-session/{entreprise_id}/{price_id}")
 async def create_checkout_session(entreprise_id,price_id):
