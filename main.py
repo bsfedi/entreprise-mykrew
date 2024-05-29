@@ -61,7 +61,7 @@ class entreprise(BaseModel):
 
 
 
-db : Database = MongoClient("mongodb://152.228.135.170:27017/")["myKrew"]
+db : Database = MongoClient("mongodb://root:root@152.228.135.170:27017/")["myKrew"]
 
 app=FastAPI()
 stripe.api_key = "sk_test_51Konz7AH2X0tC2h7ISzXJXqRwx85OPqhCLPZgxPgUSLEU1BUlHo4e5kF0w0TCItFD8xp94YnERfOGHsAS7D4eLs5001bHenXDy"
@@ -92,9 +92,9 @@ async def add_entreprise(entreprise: entreprise):
         all_ports = db["prots"].insert_one({"entreprise":new_entreprise.inserted_id,"front":front,"back":back})
 
     # Run the shell command
-    
+
     try:
-        command = ["./docker.sh", f"{back}", f"{entreprise.name.lower()}", f"mongodb://mongo:27017/{entreprise.name.lower()}", f"{entreprise.name.lower()}", f"{front}", f"http://152.228.135.170:{back}/"]
+        command = ["./docker.sh", f"{back}", f"{entreprise.name.lower()}", f"mongodb://root:root@152.228.135.170:27017/{entreprise.name.lower()}?authSource=admin", f"{entreprise.name.lower()}", f"{front}", f"http://152.228.135.170:{back}/"]
         subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         
         add_user(entreprise)
@@ -133,7 +133,7 @@ def add_user(entreprise):
         session.starttls()  # enable security
         session.login(sender_address, sender_pass)  # login with mail_id and password
         text = message.as_string()
-        db : Database = MongoClient("mongodb://152.228.135.170:27017/")[f"{entreprise.name.lower()}"]
+        db : Database = MongoClient("mongodb://root:root@152.228.135.170:27017/")[f"{entreprise.name.lower()}"]
         response = db["users"].insert_one({
             "image": "default.jpg",
             "email": entreprise.email,
