@@ -182,6 +182,25 @@ async def create_checkout_session(entreprise_id,price_id):
     )
     return {"session_url": session.url}
 
+
+@app.get('/nb_instances')
+async def get_nb_instances():
+    total_entreprises = db['entreprise'].count_documents({})
+    all_entreprise = db['entreprise'].find()
+    
+    total_consultants = 0
+    
+    for entreprise in all_entreprise:
+        entreprise['_id'] = str(entreprise['_id'])
+        db_name = entreprise['name'].lower()  # Convert the name to lowercase
+        total_consultant = client[db_name]['users'].count_documents({})
+        entreprise['total_consultant'] = total_consultant
+        
+        total_consultants += total_consultant
+    
+    return {"total_entreprises": total_entreprises, "total_consultants": total_consultants}
+
+
 from asyncio import Queue
 
 # Initialize event queue
@@ -230,17 +249,20 @@ async def webhook(request: Request):
 
         return "OK"
 
+# Initialize the MongoDB client once
+client = MongoClient("mongodb://root:root@152.228.135.170:27017/")
 
 @app.get('/get_entreprises')
 async def get_entreprises():
     entreprises = []
     all_entreprise = db['entreprise'].find()
     for entreprise in all_entreprise:
-        entreprise['_id']=str(entreprise['_id'])
-
+        entreprise['_id'] = str(entreprise['_id'])
+        db_name = entreprise['name'].lower()  # Convert the name to lowercase
+        total_consultant = client[db_name]['users'].count_documents({})
+        entreprise['total_consultant'] = total_consultant
         entreprises.append(entreprise)
     return entreprises
-
 # @app.post('/webhook/stripe')
 # async def stripe_webhook(request: Request):
 #     # Parse the JSON payload from the request
