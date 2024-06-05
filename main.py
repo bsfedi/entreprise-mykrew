@@ -110,24 +110,25 @@ async def change_status_container(entreprise_id: str,status:str):
         return {"error": "Entreprise not found"}
 
     try:
-        # Find backend container name
-        backend_command = [
-            "docker", "ps", 
-            "--filter", f"ancestor=mykrew-backend_{entreprise['name'].lower()}", 
-            "--format", "{{.Names}}"
-        ]
-        backend_result = subprocess.run(backend_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        backend_name = backend_result.stdout.strip()
 
-        # Find frontend container name
-        frontend_command = [
-            "docker", "ps", 
-            "--filter", f"ancestor={entreprise['name'].lower()}", 
-            "--format", "{{.Names}}"
-        ]
-        frontend_result = subprocess.run(frontend_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        frontend_name = frontend_result.stdout.strip()
         if status == 'False':
+            # Find backend container name
+            backend_command = [
+                "docker", "ps", 
+                "--filter", f"ancestor=mykrew-backend_{entreprise['name'].lower()}", 
+                "--format", "{{.Names}}"
+            ]
+            backend_result = subprocess.run(backend_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            backend_name = backend_result.stdout.strip()
+
+            # Find frontend container name
+            frontend_command = [
+                "docker", "ps", 
+                "--filter", f"ancestor={entreprise['name'].lower()}", 
+                "--format", "{{.Names}}"
+            ]
+            frontend_result = subprocess.run(frontend_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            frontend_name = frontend_result.stdout.strip()
             if backend_name:
                 # Stop backend container
                 subprocess.run(["docker", "stop", backend_name], check=True)
@@ -135,11 +136,29 @@ async def change_status_container(entreprise_id: str,status:str):
                 # Stop frontend container
                 subprocess.run(["docker", "stop", frontend_name], check=True)
         else:
+            # Find backend container name
+            backend_command = [
+                "docker", "ps", "-a", 
+                "--filter", f"name={entreprise['name'].lower()}", 
+                "--format", "{{.Names}}"
+            ]
+            backend_result = subprocess.run(backend_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            backend_name = backend_result.stdout.strip()
+
+            # Find frontend container name
+            frontend_command = [
+                "docker", "ps", "-a", 
+                "--filter", f"name={entreprise['name'].lower()}", 
+                "--format", "{{.Names}}"
+            ]
+            frontend_result = subprocess.run(frontend_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            frontend_name = frontend_result.stdout.strip()
+
             if backend_name:
-                # Stop backend container
+                # Start backend container
                 subprocess.run(["docker", "start", backend_name], check=True)
             if frontend_name:
-                # Stop frontend container
+                # Start frontend container
                 subprocess.run(["docker", "start", frontend_name], check=True)
 
         return {"message": f"Containers for entreprise '{entreprise['name']}' have been stopped successfully"}
