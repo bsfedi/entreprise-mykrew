@@ -139,7 +139,7 @@ async def change_status_container(entreprise_id: str,status:str):
             # Find backend container name
             backend_command = [
                 "docker", "ps", "-a", 
-                "--filter", f"name={entreprise['name'].lower()}", 
+                "--filter", f"name=mykrew-backend_{entreprise['name'].lower()}", 
                 "--format", "{{.Names}}"
             ]
             backend_result = subprocess.run(backend_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
