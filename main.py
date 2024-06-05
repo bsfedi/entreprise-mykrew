@@ -156,7 +156,7 @@ async def change_status_container(entreprise_id: str,status:str):
             # Find frontend container name
             frontend_command = [
                 "docker", "ps", "-a", 
-                "--filter", f"name={entreprise['name'].lower()}", 
+                "--filter", f"ancestor={entreprise['name'].lower()}", 
                 "--format", "{{.Names}}"
             ]
             frontend_result = subprocess.run(frontend_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
