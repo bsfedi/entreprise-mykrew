@@ -103,6 +103,44 @@ async def add_entreprise(entreprise: entreprise):
         return {"message": "Entreprise added, but script failed!", "error": e.stderr.decode()}
 
 
+@app.get("/change_status/{entreprise_id}")
+async def change_status_container(entreprise_id: str):
+    entreprise = db['entreprise'].find_one({'_id': ObjectId(entreprise_id)})
+    if not entreprise:
+        return {"error": "Entreprise not found"}
+
+    try:
+        # Find backend container name
+        backend_command = [
+            "docker", "ps", 
+            "--filter", f"ancestor=mykrew-backend_{entreprise['name'].lower()}", 
+            "--format", "{{.Names}}"
+        ]
+        backend_result = subprocess.run(backend_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        backend_name = backend_result.stdout.strip()
+
+        # Find frontend container name
+        frontend_command = [
+            "docker", "ps", 
+            "--filter", f"ancestor={entreprise['name'].lower()}", 
+            "--format", "{{.Names}}"
+        ]
+        frontend_result = subprocess.run(frontend_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        frontend_name = frontend_result.stdout.strip()
+
+        if backend_name:
+            # Stop backend container
+            subprocess.run(["docker", "stop", backend_name], check=True)
+        if frontend_name:
+            # Stop frontend container
+            subprocess.run(["docker", "stop", frontend_name], check=True)
+
+        return {"message": f"Containers for entreprise '{entreprise['name']}' have been stopped successfully"}
+
+    except subprocess.CalledProcessError as e:
+        return {"error": "Failed to stop containers", "details": e.stderr}
+
+
 def add_user(entreprise):
     """
     Validates a password format based on specified requirements:
