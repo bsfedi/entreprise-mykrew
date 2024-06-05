@@ -135,6 +135,14 @@ async def change_status_container(entreprise_id: str,status:str):
             if frontend_name:
                 # Stop frontend container
                 subprocess.run(["docker", "stop", frontend_name], check=True)
+            db["entreprise"].update_one(
+            {"_id": ObjectId(entreprise_id)},
+            {
+                "$set": {
+                    "instance_status": "stopped"
+                }
+            },
+            )
         else:
             # Find backend container name
             backend_command = [
@@ -160,7 +168,14 @@ async def change_status_container(entreprise_id: str,status:str):
             if frontend_name:
                 # Start frontend container
                 subprocess.run(["docker", "start", frontend_name], check=True)
-
+            db["entreprise"].update_one(
+            {"_id": ObjectId(entreprise_id)},
+            {
+                "$set": {
+                    "instance_status": "started"
+                }
+            },
+            )
         return {"message": f"Containers for entreprise '{entreprise['name']}' have been stopped successfully"}
 
     except subprocess.CalledProcessError as e:
