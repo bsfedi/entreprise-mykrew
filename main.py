@@ -103,8 +103,8 @@ async def add_entreprise(entreprise: entreprise):
         return {"message": "Entreprise added, but script failed!", "error": e.stderr.decode()}
 
 
-@app.get("/change_status/{entreprise_id}")
-async def change_status_container(entreprise_id: str):
+@app.get("/change_status/{entreprise_id}/{status}")
+async def change_status_container(entreprise_id: str,status:str):
     entreprise = db['entreprise'].find_one({'_id': ObjectId(entreprise_id)})
     if not entreprise:
         return {"error": "Entreprise not found"}
@@ -127,13 +127,20 @@ async def change_status_container(entreprise_id: str):
         ]
         frontend_result = subprocess.run(frontend_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         frontend_name = frontend_result.stdout.strip()
-
-        if backend_name:
-            # Stop backend container
-            subprocess.run(["docker", "stop", backend_name], check=True)
-        if frontend_name:
-            # Stop frontend container
-            subprocess.run(["docker", "stop", frontend_name], check=True)
+        if status == 'False':
+            if backend_name:
+                # Stop backend container
+                subprocess.run(["docker", "stop", backend_name], check=True)
+            if frontend_name:
+                # Stop frontend container
+                subprocess.run(["docker", "stop", frontend_name], check=True)
+        else:
+            if backend_name:
+                # Stop backend container
+                subprocess.run(["docker", "start", backend_name], check=True)
+            if frontend_name:
+                # Stop frontend container
+                subprocess.run(["docker", "start", frontend_name], check=True)
 
         return {"message": f"Containers for entreprise '{entreprise['name']}' have been stopped successfully"}
 
