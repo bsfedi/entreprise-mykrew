@@ -69,6 +69,17 @@ stripe.api_key = "sk_test_51Konz7AH2X0tC2h7ISzXJXqRwx85OPqhCLPZgxPgUSLEU1BUlHo4e
 import random
 
 
+@app.get('/get_entreprise_by_id/{entreprise_id}')
+async def get_entreprise_by_id(entreprise_id):
+    entreprise = db['entreprise'].find_one({'_id': ObjectId(entreprise_id)})
+    entreprise['_id'] =str(entreprise['_id'] )
+    db_name = entreprise['name'].lower() 
+    total_consultant = client[db_name]['users'].count_documents({})
+    entreprise['total_consultant'] = total_consultant
+
+    return entreprise
+
+
 
 @app.post("/add_entreprise")
 async def add_entreprise(entreprise: entreprise):
