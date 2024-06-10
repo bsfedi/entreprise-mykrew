@@ -47,7 +47,8 @@ class entreprise(BaseModel):
     secteur : str =""
     taille : str  =""
     adresse : str =""
-    site_web : Optional[str] = "" 
+    site_web : Optional[str] = ""
+    instance_status: Optional[str] = ""
     nom: str
     prenom : str
     fonction : str
@@ -85,6 +86,7 @@ async def get_entreprise_by_id(entreprise_id):
 async def add_entreprise(entreprise: entreprise):
     
     check_ports= []
+    entreprise.instance_status = "started"
     new_entreprise = db['entreprise'].insert_one(entreprise.dict())
     all_ports = db["prots"].find()
     for port in all_ports :
